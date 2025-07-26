@@ -16,4 +16,7 @@
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 #include "ui.h"
+#include "control.h"
+#define LM5175_EN_GPIO 0 // GPIO number for the key input
+
 #endif

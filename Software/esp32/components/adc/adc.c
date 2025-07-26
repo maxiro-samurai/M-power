@@ -99,9 +99,9 @@ void adc_caculate_all_data(void){
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
     // ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
 
-    rt = mV * 1000 / (3300 - mV);
+    rt = mV * 1000 / (3300 - mV);  
     ADC.temp = (100 / (log(rt / 10000.0) / 3950 + 1 / 298.15) - 27315) / 100; //转换为温度值
-    ESP_LOGI(TAG, "温度: %u °C",ADC.temp);
+    // ESP_LOGI(TAG, "温度: %u°C",ADC.temp);
 
     // //电流环输出
     // average = (ADC.adc_buffer_temp[1] + ADC.adc_count[1] / 2) / ADC.adc_count[1]; // 四舍五入的整数除法
@@ -113,20 +113,21 @@ void adc_caculate_all_data(void){
     // ESP_LOGI(TAG, "Cali Voltage: %d mV",average*11865/10000);
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
     // ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
+    ADC.outV = mV * 1471 / 1000; // 扩大了100倍 避免浮点运算
     ADC.output_vol[0] = mV*1471/100000;
     ADC.output_vol[1] =(mV*1471/1000)%100;
-
+    ESP_LOGI(TAG, "out Voltage: %d",ADC.outV);
     // ESP_LOGI(TAG, "output Voltage: %02d.%02dV",ADC.output_vol[0],ADC.output_vol[1]);
 
 
     //输入电压
     average = (ADC.adc_buffer_temp[3] + ADC.adc_count[3] / 2) / ADC.adc_count[3]; // 四舍五入的整数除法
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
-    ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
+    // ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
 
     ADC.input_vol[0] = mV*1571/100000; // 扩大了100倍 避免浮点运算
     ADC.input_vol[1] = (mV * 1571 / 1000) % 100;
-    ESP_LOGI(TAG, "input Voltage: %02d.%02dV",ADC.input_vol[0],ADC.input_vol[1]);
+    // ESP_LOGI(TAG, "input Voltage: %02d.%02dV",ADC.input_vol[0],ADC.input_vol[1]);
 
 
 
@@ -174,7 +175,7 @@ void continuous_adc_read(void* arg){
         {
             ret = adc_continuous_read(handle, result, EXAMPLE_READ_LEN, &ret_num, 0);
             if (ret == ESP_OK) {
-                ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
+                // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
                 for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES) {
                     adc_digi_output_data_t *p = (void*)&result[i];
                     uint32_t chan_num = EXAMPLE_ADC_GET_CHANNEL(p);

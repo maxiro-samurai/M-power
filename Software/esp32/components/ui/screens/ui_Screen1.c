@@ -58,55 +58,24 @@ uint32_t out_power = 0;
 uint32_t set_voltage = 0;
 uint32_t set_current = 0;
 
-void simulate_output_voltage(void)
-{
-    // 模拟电压输出
-    if (set_voltage > 0) {
-        out_voltage = set_voltage;
-        
-    } else {
-        out_voltage = 0; // 如果设定电压为0，则输出电压也为0
-    }
-    // printf("Output Voltage: %d mV\n", out_voltage);
-    if(set_current > 0) {
-        out_current = set_current;
-    } else {
-        out_current = 0; // 如果设定电流为0，则输出电流也为0
-    }
-}
 
 void out_value_refresh(void)
 {
-    // uint16_t voltage_high ,voltage_low;
-    // uint16_t current_high ,current_low;
-    // uint16_t power_high ,power_low;
-    // voltage_high = out_voltage/100;
-    // voltage_low = out_voltage%100;
-    // current_high = out_current/100;
-    // current_low = out_current%100;
-
     
     lv_label_set_text_fmt(ui_Label4, "%02d.%02d", ADC.output_vol[0],ADC.output_vol[1]);
-    // printf("%02d.%02d V", voltage_high, voltage_low);
-    // lv_label_set_text_fmt(ui_Label2, "%02d.%02d", current_high, current_low);
-    // out_power  = out_voltage * out_current/100 ; // 输出功率计算，单位为mW
-    // power_high = out_power / 100;
-    // power_low = out_power % 100;
+    lv_label_set_text_fmt(ui_Label11,"%02d.%02d", ADC.input_vol[0],ADC.input_vol[1]);
+    lv_label_set_text_fmt(ui_Label15,"%u°C", ADC.temp);
 
-    // if (power_high >99){
-    //     power_low = out_power%10;
-    //    lv_label_set_text_fmt(ui_Label1, "%03d.%01d", power_high, power_low);  
-    // }
-    // else 
-
-    //    lv_label_set_text_fmt(ui_Label1, "%02d.%02d", power_high, power_low);
 
 }
+
+
+
 void ui_event_set_value(lv_event_t * e)
 {
 
     lv_event_code_t event_code = lv_event_get_code(e);
-
+ 
      if(event_code == LV_EVENT_CLICKED) {
        
         if( e->user_data == 1) {
@@ -114,6 +83,7 @@ void ui_event_set_value(lv_event_t * e)
             set_voltage = lv_spinbox_get_value(ui_Spinbox4);
             // printf("Set Voltage: %lu mV\n", set_voltage);
             // 这里可以添加代码来更新实际的电压输出
+           
         }
         
         else if( e->user_data == 2) {
@@ -365,6 +335,8 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_style_text_color(ui_Label11, lv_color_hex(0x3B09F3), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label11, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Label11, &ui_font_Font2, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
 
     ui_Label12 = lv_label_create(ui_Panel7);
     lv_obj_set_width(ui_Label12, LV_SIZE_CONTENT);   /// 1

@@ -12,8 +12,22 @@ void ui_event_Buttonhome(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
 
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Screen1_screen_init);
-        lv_indev_set_group(indev_encoder, lv_group_get_default());
+        if(e->user_data == 1) {
+            // 按钮被点击，回主页面
+                _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Screen1_screen_init);
+                lv_indev_set_group(indev_encoder, lv_group_get_default());
+            }
+            else if(e->user_data == 2) {
+                // 设置按钮被点击，回设置页面
+                _ui_screen_change(&ui_Screen3, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_Screen3_screen_init);
+                lv_indev_set_group(indev_encoder, g3);
+            
+        }
+        else if(e->user_data == 3) {
+            // 设置按钮被点击，回设置页面
+            _ui_screen_change(&ui_Screen4, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_Screen4_screen_init);
+            lv_indev_set_group(indev_encoder, g4);
+        }
     }
 }
 
@@ -132,8 +146,11 @@ void lv_example_scroll_6(void)
     /*Be sure the fist button is in the middle*/
     lv_obj_scroll_to_view(lv_obj_get_child(cont, 0), LV_ANIM_OFF);
 
-    lv_obj_add_event_cb(btn3, ui_event_Buttonhome, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(btn1, ui_event_Buttonhome, LV_EVENT_ALL, 2);//设置界面
+    lv_obj_add_event_cb(btn2, ui_event_Buttonhome, LV_EVENT_ALL, 3);//设置界面
+    lv_obj_add_event_cb(btn3, ui_event_Buttonhome, LV_EVENT_ALL, 1);
 }
+
 
 
 void ui_Screen2_screen_init(void)

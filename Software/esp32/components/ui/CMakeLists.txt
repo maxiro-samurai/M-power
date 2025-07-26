@@ -11,5 +11,5 @@ list(REMOVE_DUPLICATES HEADERS_DIRS)
 idf_component_register(
     SRCS ${SOURCES}
     INCLUDE_DIRS "." ${HEADERS_DIRS}
-    REQUIRES lvgl lvgl_porting adc
+    REQUIRES lvgl lvgl_porting adc dac8562
 )
