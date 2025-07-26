@@ -28,6 +28,7 @@ extern "C" {
  **********************/
 extern lv_group_t * g ;
 extern lv_indev_t * indev_encoder;
+// extern lv_indev_t * indev_keypad;
 /**********************
  * GLOBAL PROTOTYPES
  **********************/

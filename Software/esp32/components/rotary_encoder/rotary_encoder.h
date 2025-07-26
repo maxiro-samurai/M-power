@@ -15,6 +15,7 @@
 #define EXAMPLE_EC11_GPIO_A 22
 #define EXAMPLE_EC11_GPIO_B 21
 #define EXAMPLE_KEY_GPIO 19
+#define BTN_GPIO 37
 
 typedef enum {
     IDLE,

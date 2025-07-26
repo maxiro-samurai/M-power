@@ -44,7 +44,7 @@ void app_main(void) {
   lv_port_disp_init();    /* lvgl显示接口初始化,放在lv_init()的后面 */
   lv_port_indev_init();   /* lvgl输入接口初始化,放在lv_init()的后面 */
   dac8562_init();
-  dac8562_set_voltage(0,2.95);
+  dac8562_set_voltage(0,2.15);
   dac8562_set_voltage(1,0.3);
   // Initialize components here
   // For example, you might want to initialize Wi-Fi, BLE, or other peripherals

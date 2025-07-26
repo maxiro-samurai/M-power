@@ -31,19 +31,15 @@ static bool example_pcnt_on_reach(pcnt_unit_handle_t unit, const pcnt_watch_even
      return (high_task_wakeup == pdTRUE);
  }
  
-//  // 按键中断处理（可选）
-//  static void IRAM_ATTR Key_isr(void* arg) {
-//     static uint32_t last_press = 0;
-//     uint32_t now = xTaskGetTickCountFromISR();
+ // 按键中断处理（可选）
+ static void IRAM_ATTR Key_isr(void* arg) {
+     BaseType_t high_task_wakeup;
 
-//     // 消抖处理（200ms内不重复触发）
-//     if (now - last_press < pdMS_TO_TICKS(100)) return;
-//     last_press = now;
-
-//     // 发送按键事件到队列
-//     int8_t btn_event = 0;
-//     xQueueSendFromISR(buton_queue, &btn_event, NULL);
-// }
+    // 发送按键事件到队列
+    int8_t btn_event = 1;
+    xQueueSendFromISR(buton_queue, &btn_event, &high_task_wakeup);
+    return (high_task_wakeup == pdTRUE);
+}
 
 
 
@@ -108,9 +104,9 @@ static void pcnt_init(void)
 
 static void Key_init(void)
 {
-    ESP_LOGI(TAG, "install GPIO interrupt");
+    ESP_LOGI(TAG, " Init GPIO  ");
     gpio_config_t io_conf = {
-        .pin_bit_mask = 1ULL <<EXAMPLE_KEY_GPIO,
+        .pin_bit_mask = 1ULL <<EXAMPLE_KEY_GPIO| 1ULL <<BTN_GPIO,
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_ENABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
@@ -118,10 +114,10 @@ static void Key_init(void)
     };
     ESP_ERROR_CHECK(gpio_config(&io_conf));
     
-    // ESP_LOGI(TAG, "install GPIO interrupt");
-    // buton_queue = xQueueCreate(10, sizeof(int8_t));
-    // ESP_ERROR_CHECK(gpio_install_isr_service(0));
-    // ESP_ERROR_CHECK(gpio_isr_handler_add(EXAMPLE_KEY_GPIO, Key_isr, (void*)EXAMPLE_KEY_GPIO));
+    ESP_LOGI(TAG, "install GPIO interrupt");
+    buton_queue = xQueueCreate(10, sizeof(int8_t));
+    ESP_ERROR_CHECK(gpio_install_isr_service(0));
+    ESP_ERROR_CHECK(gpio_isr_handler_add(BTN_GPIO, Key_isr, (void*)EXAMPLE_KEY_GPIO));
     
 
 }
@@ -174,7 +170,7 @@ void encoder_task(void *arg) {
        
         
         encoder_state_detection();
-
+        
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

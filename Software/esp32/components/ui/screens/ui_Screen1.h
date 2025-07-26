@@ -52,6 +52,8 @@ extern lv_obj_t * ui_Label19;
 extern lv_obj_t * ui_Label20;
 extern lv_obj_t * ui_Label21;
 extern lv_obj_t * ui_Label15;
+extern uint16_t set_voltage ;
+extern uint16_t set_current ;
 // CUSTOM VARIABLES
 void simulate_output_voltage(void);
 void out_value_refresh(void);

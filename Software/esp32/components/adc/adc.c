@@ -116,7 +116,7 @@ void adc_caculate_all_data(void){
     ADC.outV = mV * 1471 / 1000; // 扩大了100倍 避免浮点运算
     ADC.output_vol[0] = mV*1471/100000;
     ADC.output_vol[1] =(mV*1471/1000)%100;
-    ESP_LOGI(TAG, "out Voltage: %d",ADC.outV);
+    // ESP_LOGI(TAG, "out Voltage: %d",ADC.outV);
     // ESP_LOGI(TAG, "output Voltage: %02d.%02dV",ADC.output_vol[0],ADC.output_vol[1]);
 
 

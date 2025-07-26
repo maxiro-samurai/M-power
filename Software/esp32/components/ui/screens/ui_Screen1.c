@@ -49,14 +49,15 @@ lv_obj_t * ui_Label17 = NULL;
 lv_obj_t * ui_Label18 = NULL;
 lv_obj_t * ui_Labelclear = NULL;
 
+// lv_group_t * btn_group;  //按键组
 
 // 模拟电源变量
 
 uint32_t out_voltage = 0;
 uint32_t out_current = 0;
 uint32_t out_power = 0;
-uint32_t set_voltage = 0;
-uint32_t set_current = 0;
+uint16_t set_voltage = 500; //设定电压10mv为单位
+uint16_t set_current = 0;
 
 
 void out_value_refresh(void)
@@ -69,7 +70,14 @@ void out_value_refresh(void)
 
 }
 
-
+// 4. 全局按钮事件回调函数
+static void global_button_handler(lv_event_t *e) {
+    uint32_t key = lv_event_get_key(e);
+    // printf("%lu\n",key);
+    if(key == LV_KEY_ENTER) {  // 按钮映射为ENTER键
+        printf("Global button pressed!\n");
+    }
+}
 
 void ui_event_set_value(lv_event_t * e)
 {
@@ -81,6 +89,9 @@ void ui_event_set_value(lv_event_t * e)
         if( e->user_data == 1) {
             // 按钮4被点击，设置电压值
             set_voltage = lv_spinbox_get_value(ui_Spinbox4);
+            lv_label_set_text(ui_Label24,"V");
+            lv_obj_set_style_bg_color(ui_Label24,lv_color_hex(0xEB4883), LV_PART_MAIN | LV_STATE_DEFAULT);
+
             // printf("Set Voltage: %lu mV\n", set_voltage);
             // 这里可以添加代码来更新实际的电压输出
            
@@ -89,6 +100,8 @@ void ui_event_set_value(lv_event_t * e)
         else if( e->user_data == 2) {
             // 按钮5被点击，设置电流值
             set_current = lv_spinbox_get_value(ui_Spinbox4);
+            lv_obj_set_style_bg_color(ui_Label24,lv_color_hex(0x51E4EB), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_Label24,"I");
             // printf("Set Current: %lu mA\n", set_current);
             // 这里可以添加代码来更新实际的电流输出
         }
@@ -118,6 +131,7 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_style_text_color(ui_Screen1, lv_color_hex(0x010101), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Screen1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Screen1, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+ 
 
     ui_Button1 = lv_btn_create(ui_Screen1);
     lv_obj_set_width(ui_Button1, 42);
@@ -129,6 +143,11 @@ void ui_Screen1_screen_init(void)
     lv_obj_clear_flag(ui_Button1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_Button1, lv_color_hex(0x646060), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Button1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // btn_group = lv_group_create(); //创建按键组
+    // lv_indev_set_group(indev_button, btn_group); //
+
+    // lv_group_add_obj(btn_group, ui_Button1); //添加到按键组
+
 
     ui_Label18 = lv_label_create(ui_Button1);
     lv_obj_set_align(ui_Label18, LV_ALIGN_CENTER);
@@ -607,7 +626,7 @@ void ui_Screen1_screen_init(void)
     lv_obj_add_event_cb(ui_Button3, ui_event_Button3, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Button4, ui_event_set_value, LV_EVENT_ALL, 1);
     lv_obj_add_event_cb(ui_Button5, ui_event_set_value, LV_EVENT_ALL, 2);
-
+    lv_obj_add_event_cb(ui_Button1, global_button_handler, LV_EVENT_KEY, NULL);
 }
 
 void ui_Screen1_screen_destroy(void)
