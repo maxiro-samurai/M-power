@@ -19,6 +19,9 @@ lv_obj_t * ui_Label28 = NULL;
 lv_obj_t * ui_Label29 = NULL;
 extern lv_indev_t *indev_encoder ;
 lv_group_t * g3;
+
+bool wifi_enable= false;
+bool bluethooth= false;
 // event funtions
 void ui_event_Button11(lv_event_t * e)
 {
@@ -46,8 +49,30 @@ void ui_Screen3_screen_init(void)
     lv_obj_set_align(ui_Panel1, LV_ALIGN_CENTER);
     lv_obj_clear_flag(ui_Panel1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Slider1 = lv_slider_create(ui_Panel1);
-    lv_slider_set_value(ui_Slider1, 0, LV_ANIM_OFF);
+
+
+    ui_Switch1 = lv_switch_create(ui_Panel1);   //蓝牙
+    lv_obj_set_width(ui_Switch1, 50);
+    lv_obj_set_height(ui_Switch1, 25);
+    lv_obj_set_x(ui_Switch1, 74);
+    lv_obj_set_y(ui_Switch1, -55);
+    lv_obj_set_align(ui_Switch1, LV_ALIGN_CENTER);
+    lv_obj_clear_state(ui_Switch1,LV_STATE_CHECKED);
+    lv_group_add_obj(g3,ui_Switch1);
+
+    ui_Switch3 = lv_switch_create(ui_Panel1);  // wifi
+    lv_obj_set_width(ui_Switch3, 50);
+    lv_obj_set_height(ui_Switch3, 25);
+    lv_obj_set_x(ui_Switch3, 75);
+    lv_obj_set_y(ui_Switch3, -2);
+    lv_obj_set_align(ui_Switch3, LV_ALIGN_CENTER);
+    lv_obj_clear_state(ui_Switch3,LV_STATE_CHECKED);
+    lv_group_add_obj(g3,ui_Switch3);
+
+   
+
+    ui_Slider1 = lv_slider_create(ui_Panel1); //音量
+    // lv_slider_set_value(ui_Slider1, 0, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_Slider1) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Slider1, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_Slider1, 111);
     lv_obj_set_height(ui_Slider1, 10);
@@ -56,21 +81,18 @@ void ui_Screen3_screen_init(void)
     lv_obj_set_align(ui_Slider1, LV_ALIGN_CENTER);
     lv_obj_set_style_bg_color(ui_Slider1, lv_color_hex(0x646060), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Slider1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    
+    lv_slider_set_range(ui_Slider1,0,85);
+    
     lv_group_add_obj(g3,ui_Slider1);
 
     lv_obj_set_style_bg_color(ui_Slider1, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Slider1, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
 
-    ui_Switch1 = lv_switch_create(ui_Panel1);
-    lv_obj_set_width(ui_Switch1, 50);
-    lv_obj_set_height(ui_Switch1, 25);
-    lv_obj_set_x(ui_Switch1, 74);
-    lv_obj_set_y(ui_Switch1, -55);
-    lv_obj_set_align(ui_Switch1, LV_ALIGN_CENTER);
-    lv_group_add_obj(g3,ui_Switch1);
+   
 
-    ui_Slider2 = lv_slider_create(ui_Panel1);
-    lv_slider_set_value(ui_Slider2, 0, LV_ANIM_OFF);
+    ui_Slider2 = lv_slider_create(ui_Panel1);//风扇
+    // lv_slider_set_value(ui_Slider2, 0, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_Slider2) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Slider2, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_Slider2, 108);
     lv_obj_set_height(ui_Slider2, 10);
@@ -82,15 +104,10 @@ void ui_Screen3_screen_init(void)
 
     lv_obj_set_style_bg_color(ui_Slider2, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Slider2, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_slider_set_range(ui_Slider2,0,100);
     lv_group_add_obj(g3,ui_Slider2);
 
-    ui_Switch3 = lv_switch_create(ui_Panel1);
-    lv_obj_set_width(ui_Switch3, 50);
-    lv_obj_set_height(ui_Switch3, 25);
-    lv_obj_set_x(ui_Switch3, 75);
-    lv_obj_set_y(ui_Switch3, -2);
-    lv_obj_set_align(ui_Switch3, LV_ALIGN_CENTER);
-    lv_group_add_obj(g3,ui_Switch3);
+   
 
     ui_Button11 = lv_btn_create(ui_Panel1);
     lv_obj_set_width(ui_Button11, 28);
@@ -131,7 +148,7 @@ void ui_Screen3_screen_init(void)
     lv_obj_set_x(ui_Label27, -71);
     lv_obj_set_y(ui_Label27, 43);
     lv_obj_set_align(ui_Label27, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label27, "Backlight");
+    lv_label_set_text(ui_Label27, "Volume");
 
     ui_Label28 = lv_label_create(ui_Panel1);
     lv_obj_set_width(ui_Label28, LV_SIZE_CONTENT);   /// 1

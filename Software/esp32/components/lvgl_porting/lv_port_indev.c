@@ -176,6 +176,7 @@ static void encoder_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
     if (GPIO_LEVEL == 0) {
        
         encoder_state = LV_INDEV_STATE_PR;
+        // beep_test(&Beep2);
     } else {
        
         encoder_state = LV_INDEV_STATE_REL;
@@ -183,6 +184,8 @@ static void encoder_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
     
     data->state = encoder_state;
     encoder_diff = encoder_state_detection();
+    if(encoder_diff != 0 )
+    beep_test(&Beep1);
     data->enc_diff = encoder_diff;
 }
 

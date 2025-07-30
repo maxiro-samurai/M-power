@@ -18,13 +18,13 @@ void ui_event_Buttonhome(lv_event_t * e)
                 lv_indev_set_group(indev_encoder, lv_group_get_default());
             }
             else if(e->user_data == 2) {
-                // 设置按钮被点击，回设置页面
+                // 设置界面
                 _ui_screen_change(&ui_Screen3, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_Screen3_screen_init);
                 lv_indev_set_group(indev_encoder, g3);
             
         }
         else if(e->user_data == 3) {
-            // 设置按钮被点击，回设置页面
+            // 图标界面
             _ui_screen_change(&ui_Screen4, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_Screen4_screen_init);
             lv_indev_set_group(indev_encoder, g4);
         }

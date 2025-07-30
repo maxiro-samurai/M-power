@@ -94,6 +94,8 @@ void adc_caculate_all_data(void){
     uint32_t mV;
     int rt ;
     
+
+    if (xSemaphoreTake(ADC.adc_semaphore, portMAX_DELAY) == pdTRUE) {
     //温度
     average = (ADC.adc_buffer_temp[0] + ADC.adc_count[0] / 2) / ADC.adc_count[0]; // 四舍五入的整数除法
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
@@ -124,14 +126,14 @@ void adc_caculate_all_data(void){
     average = (ADC.adc_buffer_temp[3] + ADC.adc_count[3] / 2) / ADC.adc_count[3]; // 四舍五入的整数除法
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
     // ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
-
+    // ADC.inV = mV * 1571 / 1000; // 扩大了100倍 避免浮点运算
     ADC.input_vol[0] = mV*1571/100000; // 扩大了100倍 避免浮点运算
     ADC.input_vol[1] = (mV * 1571 / 1000) % 100;
     // ESP_LOGI(TAG, "input Voltage: %02d.%02dV",ADC.input_vol[0],ADC.input_vol[1]);
 
 
-
-
+     xSemaphoreGive(ADC.adc_semaphore);
+    }   
 
     //电流
     // average = (ADC.adc_buffer_temp[4] + ADC.adc_count[4] / 2) / ADC.adc_count[4]; // 四舍五入的整数除法
@@ -149,6 +151,7 @@ void continuous_adc_read(void* arg){
     esp_err_t ret;
     uint32_t ret_num = 0;
     uint8_t result[EXAMPLE_READ_LEN] = {0};
+    adc_data_init();
     memset(result, 0xcc, EXAMPLE_READ_LEN);
 
     s_task_handle = xTaskGetCurrentTaskHandle();

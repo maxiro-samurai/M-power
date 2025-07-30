@@ -8,7 +8,7 @@
  
 static const char *TAG = "example";
 QueueHandle_t encoder_queue = NULL;
-QueueHandle_t buton_queue = NULL;
+// SemaphoreHandle_t button_sem = NULL;
 pcnt_unit_handle_t pcnt_unit = NULL;
 
 static rotary_encoder_item_t rotatry_encoder = {
@@ -31,16 +31,12 @@ static bool example_pcnt_on_reach(pcnt_unit_handle_t unit, const pcnt_watch_even
      return (high_task_wakeup == pdTRUE);
  }
  
- // 按键中断处理（可选）
- static void IRAM_ATTR Key_isr(void* arg) {
-     BaseType_t high_task_wakeup;
-
-    // 发送按键事件到队列
-    int8_t btn_event = 1;
-    xQueueSendFromISR(buton_queue, &btn_event, &high_task_wakeup);
-    return (high_task_wakeup == pdTRUE);
-}
-
+//  // 按键中断处理（可选）
+// static bool IRAM_ATTR Key_isr(void* arg) {
+//     BaseType_t high_task_wakeup = pdFALSE;
+//     xSemaphoreGiveFromISR(button_sem, &high_task_wakeup);
+//     return (high_task_wakeup == pdTRUE);
+// }
 
 
 static void pcnt_init(void)
@@ -106,19 +102,19 @@ static void Key_init(void)
 {
     ESP_LOGI(TAG, " Init GPIO  ");
     gpio_config_t io_conf = {
-        .pin_bit_mask = 1ULL <<EXAMPLE_KEY_GPIO| 1ULL <<BTN_GPIO,
+        .pin_bit_mask = 1ULL <<BTN_GPIO|1ULL <<EXAMPLE_KEY_GPIO,
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_ENABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_ANYEDGE
+        .intr_type = GPIO_INTR_DISABLE,
     };
     ESP_ERROR_CHECK(gpio_config(&io_conf));
     
-    ESP_LOGI(TAG, "install GPIO interrupt");
-    buton_queue = xQueueCreate(10, sizeof(int8_t));
-    ESP_ERROR_CHECK(gpio_install_isr_service(0));
-    ESP_ERROR_CHECK(gpio_isr_handler_add(BTN_GPIO, Key_isr, (void*)EXAMPLE_KEY_GPIO));
-    
+    // ESP_LOGI(TAG, "install GPIO interrupt");
+    // button_sem = xSemaphoreCreateBinary();
+    // ESP_ERROR_CHECK(gpio_install_isr_service(0));
+    // ESP_ERROR_CHECK(gpio_isr_handler_add(BTN_GPIO, Key_isr,NULL));
+
 
 }
 
@@ -135,7 +131,8 @@ void rotary_encoder_init(void)
 */
 
 int16_t encoder_state_detection(void) {
-
+    static int16_t accumulated = 0;
+    int16_t clicks ;
     pcnt_unit_get_count(pcnt_unit,&rotatry_encoder.encoder_value); //读取编码器值
     
 
@@ -144,17 +141,26 @@ int16_t encoder_state_detection(void) {
 
         rotatry_encoder.diff = rotatry_encoder.encoder_value - rotatry_encoder.last_encoder_value; //计算差值
 
-        ESP_LOGI(TAG, " Diff: %d",  rotatry_encoder.diff);
+        accumulated += rotatry_encoder.diff;
+       
+        // 计算完成的刻度数（每个刻度2个脉冲）
+        clicks = accumulated / PULSES_PER_CLICK;
+         ESP_LOGI(TAG, " clicks: %d",  clicks);
+        // 保留未完成的脉冲
+        accumulated %= PULSES_PER_CLICK;
+    
+        // 返回实际刻度变化（正负表示方向）
+       
         rotatry_encoder.last_encoder_value = rotatry_encoder.encoder_value; 
         
     } 
 
     else {
-        rotatry_encoder.diff = 0; //如果没有变化，差值为0
+        clicks = 0; //如果没有变化，差值为0
     }
 
     
-    return rotatry_encoder.diff ; //如果差值小于4，返回0
+     return clicks; 
     
    
 }
@@ -171,7 +177,7 @@ void encoder_task(void *arg) {
         
         encoder_state_detection();
         
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 

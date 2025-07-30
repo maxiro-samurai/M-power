@@ -52,8 +52,14 @@ extern lv_obj_t * ui_Label19;
 extern lv_obj_t * ui_Label20;
 extern lv_obj_t * ui_Label21;
 extern lv_obj_t * ui_Label15;
+extern lv_obj_t * ui_Label16 ;
+extern lv_obj_t * ui_Labelwifi ;
+extern lv_obj_t * ui_Labelsound ;
+
 extern uint16_t set_voltage ;
 extern uint16_t set_current ;
+extern uint16_t ovp; //过压
+extern uint16_t ocp; //过流
 // CUSTOM VARIABLES
 void simulate_output_voltage(void);
 void out_value_refresh(void);

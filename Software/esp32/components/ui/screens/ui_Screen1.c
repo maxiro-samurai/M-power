@@ -48,36 +48,29 @@ lv_obj_t * ui_Label16 = NULL;
 lv_obj_t * ui_Label17 = NULL;
 lv_obj_t * ui_Label18 = NULL;
 lv_obj_t * ui_Labelclear = NULL;
-
+lv_obj_t * ui_Labelwifi = NULL;
+lv_obj_t * ui_Labelsound = NULL;
 // lv_group_t * btn_group;  //按键组
 
 // 模拟电源变量
 
-uint32_t out_voltage = 0;
-uint32_t out_current = 0;
-uint32_t out_power = 0;
-uint16_t set_voltage = 500; //设定电压10mv为单位
-uint16_t set_current = 0;
 
+uint16_t set_voltage = 900; //设定电压10mv为单位
+uint16_t set_current = 100;
+uint16_t ovp = 4000; //过压
+uint16_t ocp = 1000; //过流
 
 void out_value_refresh(void)
-{
-    
+{   
     lv_label_set_text_fmt(ui_Label4, "%02d.%02d", ADC.output_vol[0],ADC.output_vol[1]);
     lv_label_set_text_fmt(ui_Label11,"%02d.%02d", ADC.input_vol[0],ADC.input_vol[1]);
     lv_label_set_text_fmt(ui_Label15,"%u°C", ADC.temp);
-
+    lv_bar_set_value(ui_Bar1,ADC.input_vol[0], LV_ANIM_OFF);
+    lv_bar_set_value(ui_Bar3,ADC.temp,LV_ANIM_OFF);
 
 }
 
-// 4. 全局按钮事件回调函数
-static void global_button_handler(lv_event_t *e) {
-    uint32_t key = lv_event_get_key(e);
-    // printf("%lu\n",key);
-    if(key == LV_KEY_ENTER) {  // 按钮映射为ENTER键
-        printf("Global button pressed!\n");
-    }
-}
+
 
 void ui_event_set_value(lv_event_t * e)
 {
@@ -92,19 +85,46 @@ void ui_event_set_value(lv_event_t * e)
             lv_label_set_text(ui_Label24,"V");
             lv_obj_set_style_bg_color(ui_Label24,lv_color_hex(0xEB4883), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-            // printf("Set Voltage: %lu mV\n", set_voltage);
-            // 这里可以添加代码来更新实际的电压输出
+           
            
         }
         
         else if( e->user_data == 2) {
             // 按钮5被点击，设置电流值
             set_current = lv_spinbox_get_value(ui_Spinbox4);
+            if(set_current > ocp) {
+                set_current = ocp; // 限制电流值不超过过流保护值
+            }
             lv_obj_set_style_bg_color(ui_Label24,lv_color_hex(0x51E4EB), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_label_set_text(ui_Label24,"I");
-            // printf("Set Current: %lu mA\n", set_current);
-            // 这里可以添加代码来更新实际的电流输出
+
+            
         }
+        else if( e->user_data == 3) {
+            // 按钮5被点击，设置过流保护
+            ocp = lv_spinbox_get_value(ui_Spinbox4);
+            lv_obj_set_style_bg_color(ui_Label24,lv_color_hex(0x4A65C2), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_Label24,"I");
+           
+        }
+        else if( e->user_data == 4) {
+            // 按钮5被点击，设置过压保护
+            ovp = lv_spinbox_get_value(ui_Spinbox4);
+            lv_obj_set_style_bg_color(ui_Label24,lv_color_hex(0xAE4ACF), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_Label24,"V");
+            
+        }
+        else if(e->user_data == 5) {
+            // 按钮2被点击，恢复默认设置
+            set_voltage = 900;
+            set_current = 0;
+            ovp = 4000;
+            ocp = 1000;
+            lv_spinbox_set_value(ui_Spinbox4, 0);
+            
+            lv_obj_set_style_bg_color(ui_Label24,lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+        }
+        
     }
 
 
@@ -204,7 +224,8 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_y(ui_Spinbox4, -16);
     lv_obj_set_align(ui_Spinbox4, LV_ALIGN_CENTER);
     lv_spinbox_set_digit_format(ui_Spinbox4, 4, 2);
-    lv_spinbox_set_range(ui_Spinbox4, 0, 9999);
+    lv_spinbox_set_value(ui_Spinbox4, set_voltage);
+    lv_spinbox_set_range(ui_Spinbox4, 0, 4000);
     lv_spinbox_set_cursor_pos(ui_Spinbox4, 1 - 1);
     lv_obj_set_style_bg_color(ui_Spinbox4, lv_color_hex(0xFCFCF9), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Spinbox4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -214,7 +235,7 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_style_text_font(ui_Spinbox4, &ui_font_consola14, LV_PART_MAIN | LV_STATE_DEFAULT);
  
 
-
+    
     ui_Label24 = lv_label_create(ui_Panel6);
     lv_obj_set_width(ui_Label24, 51);
     lv_obj_set_height(ui_Label24, 30);
@@ -373,7 +394,7 @@ void ui_Screen1_screen_init(void)
 
     ui_Bar1 = lv_bar_create(ui_Panel7);
     lv_bar_set_range(ui_Bar1, 0, 40);
-    lv_bar_set_value(ui_Bar1, 12, LV_ANIM_OFF);
+    lv_bar_set_value(ui_Bar1, 0, LV_ANIM_OFF);
     lv_bar_set_start_value(ui_Bar1, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_Bar1, 61);
     lv_obj_set_height(ui_Bar1, 10);
@@ -413,7 +434,7 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_x(ui_Label3, -6);
     lv_obj_set_y(ui_Label3, 11);
     lv_obj_set_align(ui_Label3, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label3, "12:56");
+    lv_label_set_text(ui_Label3, "00:00");
     lv_obj_set_style_text_color(ui_Label3, lv_color_hex(0xF23396), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Label3, &ui_font_Font2, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -469,23 +490,49 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_style_bg_color(ui_Container1, lv_color_hex(0x646060), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Container1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label14 = lv_label_create(ui_Container1);
-    lv_obj_set_width(ui_Label14, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label14, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label14, 2);
-    lv_obj_set_y(ui_Label14, 0);
-    lv_obj_set_align(ui_Label14, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label14, "19:00");
-    lv_obj_set_style_text_color(ui_Label14, lv_color_hex(0xFEFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Label14, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label16= lv_label_create(ui_Container1);
+    //// 时间控件
+
+    // ui_Label14 = lv_label_create(ui_Container1);
+    // lv_obj_set_width(ui_Label14, LV_SIZE_CONTENT);   /// 1
+    // lv_obj_set_height(ui_Label14, LV_SIZE_CONTENT);    /// 1
+    // lv_obj_set_x(ui_Label14, 2);
+    // lv_obj_set_y(ui_Label14, 0);
+    // lv_obj_set_align(ui_Label14, LV_ALIGN_CENTER);
+    // lv_label_set_text(ui_Label14, "19:00");
+    // lv_obj_set_style_text_color(ui_Label14, lv_color_hex(0xFEFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_text_opa(ui_Label14, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
+    ui_Labelsound =  lv_label_create(ui_Container1);
+    lv_obj_set_width(ui_Labelsound, LV_SIZE_CONTENT);   /// 
+    lv_obj_set_height(ui_Labelsound, LV_SIZE_CONTENT);    /// 1
+    
+    lv_obj_align(ui_Labelsound, LV_ALIGN_RIGHT_MID,-10, 0);
+    lv_label_set_text(ui_Labelsound,LV_SYMBOL_VOLUME_MAX);
+    lv_obj_set_style_text_color(ui_Labelsound, lv_color_hex(0xFEFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Labelsound, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Labelwifi = lv_label_create(ui_Container1);
+    lv_obj_set_width(ui_Labelwifi, LV_SIZE_CONTENT);   /// wifi 图标
+    lv_obj_set_height(ui_Labelwifi, LV_SIZE_CONTENT);    /// 1
+    lv_obj_align(ui_Labelwifi, LV_ALIGN_RIGHT_MID, -40, 0);
+    lv_label_set_text(ui_Labelwifi,LV_SYMBOL_WIFI);
+    
+    lv_obj_set_style_text_color(ui_Labelwifi, lv_color_hex(0xFEFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Labelwifi, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
+
+    
+
+    ui_Label16= lv_label_create(ui_Container1);  //蓝牙图标
     lv_obj_set_width(ui_Label16, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label16, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label16, 2);
-    lv_obj_set_y(ui_Label16, 0);
-    lv_obj_set_align(ui_Label16, LV_ALIGN_RIGHT_MID);
-    lv_label_set_text(ui_Label16, LV_SYMBOL_VOLUME_MAX "  "LV_SYMBOL_BLUETOOTH"  "LV_SYMBOL_WIFI"  ");
+    // lv_obj_set_align(ui_Label16, LV_ALIGN_RIGHT_MID);
+    // lv_obj_align_to(ui_Label16,ui_Container1,LV_ALIGN_RIGHT_MID,2,0);
+    lv_obj_align(ui_Label16, LV_ALIGN_RIGHT_MID, -70, 0);
+    lv_label_set_text(ui_Label16, "");
     // lv_label_set_text_fmt(ui_Label16, LV_SYMBOL_VOLUME_MAX    LV_SYMBOL_BLUETOOTH);
     lv_obj_set_style_text_color(ui_Label16, lv_color_hex(0xFEFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label16, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -623,10 +670,14 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_style_bg_color(ui_Label15, lv_color_hex(0xBFB63F), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Label15, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_add_event_cb(ui_Button3, ui_event_Button3, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_Button4, ui_event_set_value, LV_EVENT_ALL, 1);
-    lv_obj_add_event_cb(ui_Button5, ui_event_set_value, LV_EVENT_ALL, 2);
-    lv_obj_add_event_cb(ui_Button1, global_button_handler, LV_EVENT_KEY, NULL);
+    lv_obj_add_event_cb(ui_Button3, ui_event_Button3, LV_EVENT_ALL, NULL); //切换页面
+    lv_obj_add_event_cb(ui_Button4, ui_event_set_value, LV_EVENT_ALL, 1); // 设置电压
+    lv_obj_add_event_cb(ui_Button5, ui_event_set_value, LV_EVENT_ALL, 2);// 设置电流
+    lv_obj_add_event_cb(ui_Button6, ui_event_set_value, LV_EVENT_ALL, 3);//设置OCP保护
+    lv_obj_add_event_cb(ui_Button7, ui_event_set_value, LV_EVENT_ALL, 4);//设置OVP保护
+
+    lv_obj_add_event_cb(ui_Button2, ui_event_set_value, LV_EVENT_ALL, 5);//清空设定值
+
 }
 
 void ui_Screen1_screen_destroy(void)

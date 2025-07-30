@@ -26,6 +26,9 @@ extern lv_obj_t * ui_Label26;
 extern lv_obj_t * ui_Label27;
 extern lv_obj_t * ui_Label28;
 extern lv_group_t * g3;
+extern bool wifi_enable;
+extern bool bluethooth;
+
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

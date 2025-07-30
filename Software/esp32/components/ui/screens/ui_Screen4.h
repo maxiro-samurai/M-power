@@ -16,8 +16,9 @@ extern void ui_Screen4_screen_destroy(void);
 extern lv_obj_t * ui_Screen4;
 extern lv_obj_t * ui_Chart1;
 extern lv_group_t * g4;
+extern bool paused;
 // CUSTOM VARIABLES
-void update_power_chart(float voltage, float current);
+void update_power_chart(uint16_t voltage, uint16_t current);
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

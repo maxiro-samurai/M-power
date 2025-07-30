@@ -4,14 +4,15 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "freertos/semphr.h"
 #include "esp_log.h"
 #include "driver/pulse_cnt.h"
 #include "driver/gpio.h"
 #include "esp_sleep.h"
 #include "beep.h"
-#define EXAMPLE_PCNT_HIGH_LIMIT 100
-#define EXAMPLE_PCNT_LOW_LIMIT  -100
-
+#define EXAMPLE_PCNT_HIGH_LIMIT 500
+#define EXAMPLE_PCNT_LOW_LIMIT  -500
+#define PULSES_PER_CLICK 2 // 每个刻度2个脉冲
 #define EXAMPLE_EC11_GPIO_A 22
 #define EXAMPLE_EC11_GPIO_B 21
 #define EXAMPLE_KEY_GPIO 19
@@ -44,6 +45,7 @@ typedef struct rotary_encoder_item_t
     // uint32_t hold_tick; //按键保持时间
 }rotary_encoder_item_t;
 
+// extern SemaphoreHandle_t button_sem ;
 void rotary_encoder_init(void);
 void encoder_task(void *arg);
 int16_t encoder_state_detection(void);

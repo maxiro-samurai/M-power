@@ -19,6 +19,7 @@ extern "C" {
  *********************/
 #include "lvgl__lvgl/lvgl.h"
 #include "rotary_encoder.h"
+#include "beep.h"
 /*********************
  *      DEFINES
  *********************/

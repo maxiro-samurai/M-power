@@ -58,7 +58,7 @@ void SetSound(TONE sound[]);
 void PlaySoundLoop(void);
 uint8_t PlayTones(TONE* sound, uint16_t* Schedule);
 void beep_test(TONE* soundArray);
-
+void buzzer_set_duty(uint32_t duty_percent);
 extern bool Volume;
 extern TONE testSound[];
 extern TONE BootSound[];
@@ -69,4 +69,5 @@ extern TONE Beep2[];
 extern TONE Beep3[];
 extern TONE twinkleStar[];
 extern uint16_t PlayTones_Schedule;
+extern uint8_t sound_duty;
 #endif // BEEP_H 

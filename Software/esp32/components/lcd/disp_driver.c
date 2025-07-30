@@ -15,7 +15,8 @@ void *disp_driver_init(void)
 
 void disp_driver_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
 {
-
+    
     st7789_flush(drv, area, color_map);
+    
 }
 

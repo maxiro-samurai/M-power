@@ -4,6 +4,8 @@ bool Volume = true;
 uint32_t PlayTonesTimer = 0;
 uint16_t PlayTonesDelayTime = 0;
 uint16_t PlayTones_Schedule = 0;
+
+uint8_t sound_duty  = 50;
 TONE* MySound = NULL;
 static const char *TAG = "Sound";
 TONE testSound[]= {
@@ -138,9 +140,19 @@ void buzzer_set_freq(uint32_t freq, uint32_t duty_percent) {
     }
 }
 
+void buzzer_set_duty(uint32_t duty_percent){
+      // 计算占空比（0~8191对应0%~100%）
+        uint32_t duty = (255 * duty_percent) / 100;
+        ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, duty);
+        ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+
+
+}
+
+
 void set_Tone(uint32_t freq)
 {
-    buzzer_set_freq(freq,50);
+    buzzer_set_freq(freq,sound_duty);
     ESP_LOGI(TAG, "sound freq: %lu", freq);
 
 }

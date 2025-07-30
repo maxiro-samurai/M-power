@@ -16,7 +16,7 @@ static lv_obj_t *chart;
 static lv_chart_series_t *ser_voltage;
 static lv_chart_series_t *ser_current;
 static uint32_t point_counter = 0;
-
+bool paused = true;
 // 电压电流数据结构
 typedef struct {
     float voltage;
@@ -24,15 +24,69 @@ typedef struct {
     uint32_t timestamp;
 } power_data_t;
 
-#define MAX_DATA_POINTS 100
+#define MAX_DATA_POINTS 200
 static power_data_t data_log[MAX_DATA_POINTS];
 static uint8_t data_index = 0;
+
+
+void ui_event_Buttonback(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_Screen2, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Screen2_screen_init);
+        lv_indev_set_group(indev_encoder, g2);
+    }
+}
+
+// 缩放回调函数
+static void zoom_in_cb(lv_event_t *e) {
+    lv_obj_t *chart = (lv_obj_t *)lv_event_get_user_data(e);
+    lv_coord_t zoom_x = lv_chart_get_zoom_x(chart);
+    zoom_x = zoom_x - LV_IMG_ZOOM_NONE;
+    if(zoom_x < LV_IMG_ZOOM_NONE) { // 最大缩放限制
+        zoom_x = LV_IMG_ZOOM_NONE;
+    }
+    lv_chart_set_zoom_x(chart, zoom_x);
+
+}
+
+static void zoom_out_cb(lv_event_t *e) {
+    lv_obj_t *chart = (lv_obj_t *)lv_event_get_user_data(e);
+    lv_coord_t zoom_x = lv_chart_get_zoom_x(chart);
+
+    zoom_x = zoom_x + LV_IMG_ZOOM_NONE;
+    if(zoom_x > 1280) { // 最小缩放限制
+         zoom_x = LV_IMG_ZOOM_NONE*5;
+        
+    }
+    lv_chart_set_zoom_x(chart, zoom_x);
+
+}
+static void pause_resume_cb(lv_event_t *e) {
+    paused = !paused;
+    
+    lv_obj_t *btn = lv_event_get_target(e);
+    lv_obj_t *label = lv_obj_get_child(btn, NULL);
+    
+    if(paused) {
+        lv_label_set_text(label, "resume");
+        // 停止更新图表
+        // lv_timer_pause(timer);
+    } else {
+        lv_label_set_text(label, "pause");
+        // 恢复更新图表
+        // lv_timer_resume(timer);
+    }
+}
+
+
 
 // 创建电压电流图表
 void create_power_chart(lv_obj_t *parent) {
     // 创建图表对象
     chart = lv_chart_create(parent);
-    lv_obj_set_size(chart, 300, 200);
+    lv_obj_set_size(chart, 250, 150);
     lv_obj_align(chart, LV_ALIGN_CENTER, 0, 0);
     
     // 设置图表类型为折线图
@@ -42,8 +96,8 @@ void create_power_chart(lv_obj_t *parent) {
     lv_chart_set_point_count(chart, MAX_DATA_POINTS);
     
     // 设置范围
-    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);   // 电压范围 0-100V
-    lv_chart_set_range(chart, LV_CHART_AXIS_SECONDARY_Y, 0, 20);  // 电流范围 0-20A
+    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 40);   // 电压范围 0-100V
+    lv_chart_set_range(chart, LV_CHART_AXIS_SECONDARY_Y, 0, 15);  // 电流范围 0-20A
     
     // 添加网格
     lv_chart_set_div_line_count(chart, 5, 7); // 水平5条，垂直7条
@@ -65,13 +119,13 @@ void create_power_chart(lv_obj_t *parent) {
     lv_label_set_text(label, "U(V)");
     lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0);
     lv_obj_align(label, LV_ALIGN_TOP_LEFT, 5, 5);
-    
+    lv_chart_set_axis_tick(chart,LV_CHART_AXIS_PRIMARY_Y,5,2,4,1,true,30);
     // 电流轴标签
     label = lv_label_create(chart);
     lv_label_set_text(label, "I(A)");
     lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_BLUE), 0);
     lv_obj_align(label, LV_ALIGN_TOP_RIGHT, -5, 5);
-    
+    lv_chart_set_axis_tick(chart,LV_CHART_AXIS_SECONDARY_Y,5,2,4,1,true,30);
     // 添加X轴时间标签
     label = lv_label_create(chart);
     lv_label_set_text(label, "time(s)");
@@ -83,14 +137,19 @@ void create_power_chart(lv_obj_t *parent) {
     lv_obj_align_to(btn_zoom_in, chart, LV_ALIGN_OUT_BOTTOM_RIGHT, -50, 10);
     lv_obj_t *label_btn = lv_label_create(btn_zoom_in);
     lv_label_set_text(label_btn, "+");
-    // lv_obj_add_event_cb(btn_zoom_in, zoom_in_cb, LV_EVENT_CLICKED, chart);
-    
+    lv_obj_set_style_bg_color(btn_zoom_in, lv_color_hex(0x646060), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(btn_zoom_in, zoom_in_cb, LV_EVENT_CLICKED, chart);
+    lv_group_add_obj(g4,btn_zoom_in);
+
     lv_obj_t *btn_zoom_out = lv_btn_create(parent);
     lv_obj_set_size(btn_zoom_out, 40, 30);
     lv_obj_align_to(btn_zoom_out, chart, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 10);
     label_btn = lv_label_create(btn_zoom_out);
     lv_label_set_text(label_btn, "-");
-    // lv_obj_add_event_cb(btn_zoom_out, zoom_out_cb, LV_EVENT_CLICKED, chart);
+    lv_obj_set_align(label_btn, LV_ALIGN_CENTER);
+    lv_obj_set_style_bg_color(btn_zoom_out, lv_color_hex(0x646060), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_group_add_obj(g4,btn_zoom_out);
+    lv_obj_add_event_cb(btn_zoom_out, zoom_out_cb, LV_EVENT_CLICKED, chart);
     
     // 添加暂停/继续按钮
     static bool paused = false;
@@ -98,12 +157,35 @@ void create_power_chart(lv_obj_t *parent) {
     lv_obj_set_size(btn_pause, 80, 30);
     lv_obj_align_to(btn_pause, chart, LV_ALIGN_OUT_BOTTOM_LEFT, 10, 10);
     label_btn = lv_label_create(btn_pause);
+    lv_obj_set_align(label_btn, LV_ALIGN_CENTER);
     lv_label_set_text(label_btn, "pause");
-    // lv_obj_add_event_cb(btn_pause, [](lv_event_t *e) {
-    //     paused = !paused;
-    //     lv_label_set_text(lv_obj_get_child(e->target, 0), paused ? "start" : "pause");
-    // }, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_style_bg_color(btn_pause, lv_color_hex(0x646060), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_group_add_obj(g4,btn_pause);
+    lv_obj_add_event_cb(btn_pause,pause_resume_cb , LV_EVENT_CLICKED, NULL);
     
+    lv_obj_t *btn_back = lv_btn_create(parent);
+   
+    lv_obj_set_width(btn_back, 28);
+    lv_obj_set_height(btn_back, 22);
+    lv_obj_align(btn_back, LV_ALIGN_TOP_LEFT,10,10);
+    lv_obj_add_flag(btn_back, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(btn_back, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(btn_back, lv_color_hex(0x646060), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(btn_back, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_group_add_obj(g4,btn_back);
+    
+    lv_obj_t *btn_label = lv_label_create(btn_back);
+    lv_obj_set_align(btn_label,LV_ALIGN_CENTER);
+    lv_label_set_text_fmt(btn_label, LV_SYMBOL_LEFT);
+    lv_obj_set_style_text_font(btn_label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    
+
+    lv_obj_add_event_cb(btn_back, ui_event_Buttonback, LV_EVENT_ALL, NULL);
+
+
+
+
+
     // 初始化数据数组
     for(int i = 0; i < MAX_DATA_POINTS; i++) {
         data_log[i].voltage = 0;
@@ -114,58 +196,10 @@ void create_power_chart(lv_obj_t *parent) {
     }
 }
 
-// 缩放回调函数
-static void zoom_in_cb(lv_event_t *e) {
-    lv_obj_t *chart = (lv_obj_t *)lv_event_get_user_data(e);
-    lv_coord_t zoom_x = lv_chart_get_zoom_x(chart);
-    if(zoom_x < 256) { // 最大缩放限制
-        lv_chart_set_zoom_x(chart, zoom_x * 2);
-    }
-}
-
-static void zoom_out_cb(lv_event_t *e) {
-    lv_obj_t *chart = (lv_obj_t *)lv_event_get_user_data(e);
-    lv_coord_t zoom_x = lv_chart_get_zoom_x(chart);
-    if(zoom_x > 1) { // 最小缩放限制
-        lv_chart_set_zoom_x(chart, zoom_x / 2);
-    }
-}
-// 自动调整图表范围
-void adjust_chart_range(void) {
-    float max_voltage = 0;
-    float min_voltage = 1000;
-    float max_current = 0;
-    float min_current = 1000;
-    
-    // 查找最小/最大值
-    for(int i = 0; i < MAX_DATA_POINTS; i++) {
-        if(data_log[i].voltage > max_voltage) max_voltage = data_log[i].voltage;
-        if(data_log[i].voltage < min_voltage) min_voltage = data_log[i].voltage;
-        if(data_log[i].current > max_current) max_current = data_log[i].current;
-        if(data_log[i].current < min_current) min_current = data_log[i].current;
-    }
-    
-    // 添加10%的裕量
-    float voltage_range = max_voltage - min_voltage;
-    float current_range = max_current - min_current;
-    
-    if(voltage_range < 1) voltage_range = 10; // 防止除零
-    if(current_range < 0.1) current_range = 2;
-    
-    // 设置电压轴范围
-    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 
-                      (int32_t)((min_voltage - voltage_range * 0.1) * 10),
-                      (int32_t)((max_voltage + voltage_range * 0.1) * 10));
-    
-    // 设置电流轴范围
-    lv_chart_set_range(chart, LV_CHART_AXIS_SECONDARY_Y, 
-                      (int32_t)((min_current - current_range * 0.1) * 100),
-                      (int32_t)((max_current + current_range * 0.1) * 100));
-}
 
 // 更新图表数据 (在定时器或数据采集回调中调用)
-void update_power_chart(float voltage, float current) {
-    static bool paused = false;
+void update_power_chart(uint16_t voltage, uint16_t current) {
+    
     if(paused) return;
     
     // 保存数据到历史记录
@@ -174,8 +208,8 @@ void update_power_chart(float voltage, float current) {
     data_log[data_index].timestamp = point_counter;
     
     // 更新图表数据
-    lv_chart_set_next_value(chart, ser_voltage, (int32_t)(voltage * 10)); // 乘以10保留1位小数
-    lv_chart_set_next_value(chart, ser_current, (int32_t)(current * 100)); // 乘以100保留2位小数
+    lv_chart_set_next_value(chart, ser_voltage, (int32_t)(voltage )); // 乘以10保留1位小数
+    lv_chart_set_next_value(chart, ser_current, (int32_t)(current )); // 乘以100保留2位小数
     
     // 更新索引
     data_index = (data_index + 1) % MAX_DATA_POINTS;
@@ -186,13 +220,9 @@ void update_power_chart(float voltage, float current) {
         lv_chart_refresh(chart);
     }
     
-    // 自动调整范围 (每100点检查一次)
-    static uint32_t last_range_check = 0;
-    if(point_counter - last_range_check > 100) {
-        last_range_check = point_counter;
-        adjust_chart_range();
-    }
+   
 }
+
 
 
 // 添加图例
@@ -237,12 +267,15 @@ void add_chart_legend() {
     label = lv_label_create(current_legend);
     lv_label_set_text(label, "I");
     lv_obj_align_to(label, color_ind, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
+
+    
 }
 
 
 void ui_Screen4_screen_init(void)
 {
     ui_Screen4 = lv_obj_create(NULL);
+    g4= lv_group_create();
     lv_obj_clear_flag(ui_Screen4, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     create_power_chart(ui_Screen4);

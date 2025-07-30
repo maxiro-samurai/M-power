@@ -53,7 +53,7 @@ extern "C" {
 
 
 
-#define SPI_BUS_MAX_TRANSFER_SZ (DISP_BUF_SIZE * 2)
+#define SPI_BUS_MAX_TRANSFER_SZ (DISP_BUF_SIZE * 3)
 #endif
 
 
