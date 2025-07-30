@@ -6,3 +6,5 @@ Software/esp32/sdkconfig
 Software/esp32/sdkconfig.old
 Software/esp32/sdkconfig.defaults
 Software/esp32/sdkconfig.ci
+Software/esp32/dependencies.lock
+.vscode/
