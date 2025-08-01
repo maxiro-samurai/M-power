@@ -64,6 +64,7 @@ void out_value_refresh(void)
 {   
     lv_label_set_text_fmt(ui_Label4, "%02d.%02d", ADC.output_vol[0],ADC.output_vol[1]);
     lv_label_set_text_fmt(ui_Label11,"%02d.%02d", ADC.input_vol[0],ADC.input_vol[1]);
+    lv_label_set_text_fmt(ui_Label2,"%02d.%02d", ADC.output_current[0],ADC.output_current[1]);
     lv_label_set_text_fmt(ui_Label15,"%u°C", ADC.temp);
     lv_bar_set_value(ui_Bar1,ADC.input_vol[0], LV_ANIM_OFF);
     lv_bar_set_value(ui_Bar3,ADC.temp,LV_ANIM_OFF);
@@ -235,7 +236,7 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_style_text_font(ui_Spinbox4, &ui_font_consola14, LV_PART_MAIN | LV_STATE_DEFAULT);
  
 
-    
+
     ui_Label24 = lv_label_create(ui_Panel6);
     lv_obj_set_width(ui_Label24, 51);
     lv_obj_set_height(ui_Label24, 30);
@@ -509,7 +510,7 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_height(ui_Labelsound, LV_SIZE_CONTENT);    /// 1
     
     lv_obj_align(ui_Labelsound, LV_ALIGN_RIGHT_MID,-10, 0);
-    lv_label_set_text(ui_Labelsound,LV_SYMBOL_VOLUME_MAX);
+    lv_label_set_text(ui_Labelsound,LV_SYMBOL_MUTE);
     lv_obj_set_style_text_color(ui_Labelsound, lv_color_hex(0xFEFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Labelsound, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -517,7 +518,7 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_width(ui_Labelwifi, LV_SIZE_CONTENT);   /// wifi 图标
     lv_obj_set_height(ui_Labelwifi, LV_SIZE_CONTENT);    /// 1
     lv_obj_align(ui_Labelwifi, LV_ALIGN_RIGHT_MID, -40, 0);
-    lv_label_set_text(ui_Labelwifi,LV_SYMBOL_WIFI);
+    lv_label_set_text(ui_Labelwifi,"");
     
     lv_obj_set_style_text_color(ui_Labelwifi, lv_color_hex(0xFEFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Labelwifi, 255, LV_PART_MAIN | LV_STATE_DEFAULT);

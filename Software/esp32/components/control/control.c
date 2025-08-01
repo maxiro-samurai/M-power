@@ -232,7 +232,7 @@ void control_output_task(void *arg)
             
         }
 
-      
+        
           
         if (xQueueReceive(queue, &on_reach, portMAX_DELAY) == pdTRUE) {
             // 处理定时器事件

@@ -5,7 +5,7 @@ uint32_t PlayTonesTimer = 0;
 uint16_t PlayTonesDelayTime = 0;
 uint16_t PlayTones_Schedule = 0;
 
-uint8_t sound_duty  = 50;
+uint8_t sound_duty  = 0;
 TONE* MySound = NULL;
 static const char *TAG = "Sound";
 TONE testSound[]= {

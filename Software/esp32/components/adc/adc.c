@@ -132,13 +132,24 @@ void adc_caculate_all_data(void){
     // ESP_LOGI(TAG, "input Voltage: %02d.%02dV",ADC.input_vol[0],ADC.input_vol[1]);
 
 
+     //电流
+    average = (ADC.adc_buffer_temp[4] + ADC.adc_count[4] / 2) / ADC.adc_count[4]; // 四舍五入的整数除法
+    ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
+    
+    ADC.output_current[0] = mV * 12/1000;
+    ADC.output_current[1] = (mV * 12/10)%100;
+
+    ADC.outI = mV*12;
+    ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
+    ESP_LOGI(TAG, "I: %02d.%02dA",ADC.output_current[0],ADC.output_current[1]);
+    ESP_LOGI(TAG, "I: %d mA",ADC.outI);
+    
+
+   
+
      xSemaphoreGive(ADC.adc_semaphore);
     }   
 
-    //电流
-    // average = (ADC.adc_buffer_temp[4] + ADC.adc_count[4] / 2) / ADC.adc_count[4]; // 四舍五入的整数除法
-    // ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &ADC.current));
-    // ESP_LOGI(TAG, "Cali Voltage: %lu mV",ADC.current);
    
   
 
