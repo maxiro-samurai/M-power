@@ -2,10 +2,20 @@
 
 在宿舍调试设备没有可调电源，实验室的可调电源体积大并且算是违禁物品，所以就想自己做一个可调电源，要足够迷你，能够满足调试设备的需求，并且具备恒压、恒流功能、有便携性、支持PD协议以及常见DC电源接口，XT60接口（后面可能准备看一下无人机相关的东西）。
 
-本项目也是参考一些开源项目：
+
+# 板子
+
+![板子正面](https://github.com/maxiro-samurai/picx-images-hosting/raw/master/板子正面.6pnth80psb.jpg)
+正面
+
+![板子背面](https://github.com/maxiro-samurai/picx-images-hosting/raw/master/板子背面.4g4sxqhsz9.webp)
+背面有一个地方画错了，飞线大法补上。
 
 
+![板子整体](https://github.com/maxiro-samurai/picx-images-hosting/raw/master/板子整体.51egk1ew7r.webp)
+UI界面
 
+后续更新输出电压电流测试，买的电子负载仪还没有到。目前用电压表、示波器看输出电压没有大问题，使用电子负载仪测试输出电流和带载能力。
 
 
 # 记录
