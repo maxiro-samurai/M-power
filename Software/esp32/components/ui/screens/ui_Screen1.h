@@ -60,6 +60,7 @@ extern uint16_t set_voltage ;
 extern uint16_t set_current ;
 extern uint16_t ovp; //过压
 extern uint16_t ocp; //过流
+extern bool cc_cv ;
 // CUSTOM VARIABLES
 void simulate_output_voltage(void);
 void out_value_refresh(void);

@@ -56,6 +56,7 @@ typedef struct adc_continuous_struct
     // uint16_t inV;
     uint16_t output_current[2]; 
     uint16_t outI;
+    uint16_t output_power[2];
     SemaphoreHandle_t adc_semaphore; // ADC信号量
 
 }adc_continuous_item;

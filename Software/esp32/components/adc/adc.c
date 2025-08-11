@@ -105,16 +105,18 @@ void adc_caculate_all_data(void){
     ADC.temp = (100 / (log(rt / 10000.0) / 3950 + 1 / 298.15) - 27315) / 100; //转换为温度值
     // ESP_LOGI(TAG, "温度: %u°C",ADC.temp);
 
-    // //电流环输出
-    // average = (ADC.adc_buffer_temp[1] + ADC.adc_count[1] / 2) / ADC.adc_count[1]; // 四舍五入的整数除法
-    // ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &ADC.cc_loop));
-    // ESP_LOGI(TAG, "Cali Voltage: %lu mV",ADC.cc_loop);
+    //电流环输出
+    average = (ADC.adc_buffer_temp[1] + ADC.adc_count[1] / 2) / ADC.adc_count[1]; // 四舍五入的整数除法
+    ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
+    ADC.cc_loop = mV;
+    ESP_LOGI(TAG, "Cali Voltage: %lu mV",ADC.cc_loop);
 
     //输出电压
     average = (ADC.adc_buffer_temp[2] + ADC.adc_count[2] / 2) / ADC.adc_count[2]; // 四舍五入的整数除法
     // ESP_LOGI(TAG, "Cali Voltage: %d mV",average*11865/10000);
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
     // ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
+    mV = mV -22;  //电压校准
     ADC.outV = mV * 1471 / 1000; // 扩大了100倍 避免浮点运算
     ADC.output_vol[0] = mV*1471/100000;
     ADC.output_vol[1] =(mV*1471/1000)%100;
@@ -135,16 +137,24 @@ void adc_caculate_all_data(void){
      //电流
     average = (ADC.adc_buffer_temp[4] + ADC.adc_count[4] / 2) / ADC.adc_count[4]; // 四舍五入的整数除法
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, average, &mV));
-    
+    ADC.outI = mV*12 -420;
     ADC.output_current[0] = mV * 12/1000;
     ADC.output_current[1] = (mV * 12/10)%100;
-
-    ADC.outI = mV*12;
-    ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
-    ESP_LOGI(TAG, "I: %02d.%02dA",ADC.output_current[0],ADC.output_current[1]);
-    ESP_LOGI(TAG, "I: %d mA",ADC.outI);
+    // ESP_LOGI(TAG, "Cali Voltage: %lu mV",mV);
+    // ESP_LOGI(TAG, "I: %02d.%02dA",ADC.output_current[0],ADC.output_current[1]);
+    // ESP_LOGI(TAG, "I: %d mA",ADC.outI);
     
 
+    // 计算功率（单位：mW，扩大100倍用于显示小数）
+    uint32_t power_mW = (uint32_t)ADC.outV * ADC.outI;  // (0.01V) * (mA) = 0.01mW
+    
+    // 转换为瓦特并扩大100倍（0.01W单位）
+    // 公式：功率(W) = [电压(0.01V)/100] * [电流(mA)/1000]
+    uint32_t power_centiwatt = power_mW / 10;  // 等价于 (outV * outI) / 1000
+    
+    // 拆分功率的整数部分和小数部分
+    ADC.output_power[0] = power_centiwatt / 10000;       // 瓦特整数部分
+    ADC.output_power[1] = (power_centiwatt/100) % 100;       // 两位小数（0.01W）
    
 
      xSemaphoreGive(ADC.adc_semaphore);

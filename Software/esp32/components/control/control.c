@@ -57,7 +57,7 @@ void timer_init(void)
 
 }
 
-void output_ramp(uint16_t set_voltage)  //输出缓慢变化
+void output_ramp(uint16_t set_voltage, uint16_t set_current)  //输出缓慢变化
 {
 
     uint16_t dac_value_u ,dac_value_i;
@@ -103,17 +103,31 @@ void output_ramp(uint16_t set_voltage)  //输出缓慢变化
 
         
         printf("Current Voltage: %d\n", u_now);
-        dac_value_u = 64452-13.504*u_now;
-        dac_value_i = i_now *50;
+        dac_value_u = 63696-13.504*u_now;   //输出电压设定ADC值
+        dac_value_i = i_now *16.55; // 输出电流设定值
         dac8562_write_command(DAC_WRITE_REG_A, dac_value_u);//设置输出电压
-        // dac8562_write_command(DAC_WRITE_REG_B, dac_value_i);//设置输出电流
+        dac8562_write_command(DAC_WRITE_REG_B, dac_value_i);//设置输出电流
 
+        // lv_obj_add_state(ui_Switch2,LV_STATE_CHECKED);
+        // if(cc_cv){
+        //     if(ADC.cc_loop < 2900) cc_cv = 0;//转换为恒流模式
+        //     lv_label_set_text(ui_Label7,"CV");
+        // }
+
+        // else 
+        // {
+        //     if(ADC.cc_loop > 3062) cc_cv = 1; //转换恒压模式
+        //     lv_label_set_text(ui_Label7,"CC");
+
+        // }
      }
      else{
 
         percent_u  =percent_i = 100; 
         u_now  = u_gap = u_tar =i_now = i_gap= i_tar= 0;
+        // lv_obj_clear_state(ui_Switch2,LV_STATE_CHECKED);
      }
+     
 }
 
 void bluetooth_switch_handler(lv_event_t *e){
@@ -220,7 +234,7 @@ void control_output_task(void *arg)
             gpio_set_level(LM5175_EN_GPIO, 1); //开启LM5175 
             // gpio_set_level(RED_LED_PIN, 0); // 关闭红色LED
             // gpio_set_level(GREEN_LED_PIN, 1);
-            output_ramp(set_voltage);
+            output_ramp(set_voltage,set_current);
         }
 
         else {

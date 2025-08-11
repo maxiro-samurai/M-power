@@ -55,20 +55,22 @@ lv_obj_t * ui_Labelsound = NULL;
 // 模拟电源变量
 
 
-uint16_t set_voltage = 900; //设定电压10mv为单位
-uint16_t set_current = 100;
+uint16_t set_voltage = 1500; //设定电压10mv为单位
+uint16_t set_current = 500;
 uint16_t ovp = 4000; //过压
 uint16_t ocp = 1000; //过流
-
+bool cc_cv = false; //恒压恒流模式
 void out_value_refresh(void)
 {   
     lv_label_set_text_fmt(ui_Label4, "%02d.%02d", ADC.output_vol[0],ADC.output_vol[1]);
     lv_label_set_text_fmt(ui_Label11,"%02d.%02d", ADC.input_vol[0],ADC.input_vol[1]);
     lv_label_set_text_fmt(ui_Label2,"%02d.%02d", ADC.output_current[0],ADC.output_current[1]);
     lv_label_set_text_fmt(ui_Label15,"%u°C", ADC.temp);
+     //功率
+    lv_label_set_text_fmt(ui_Label1,"%02d.%02d",ADC.output_power[0],ADC.output_power[1]);
+
     lv_bar_set_value(ui_Bar1,ADC.input_vol[0], LV_ANIM_OFF);
     lv_bar_set_value(ui_Bar3,ADC.temp,LV_ANIM_OFF);
-
 }
 
 

@@ -65,7 +65,7 @@ void app_main(void) {
   lv_port_indev_init();   /* lvgl输入接口初始化,放在lv_init()的后面 */
   dac8562_init();
   dac8562_set_voltage(0,2.55);
-  dac8562_set_voltage(1,0.3);
+  // dac8562_set_voltage(1,0.3);
   // Initialize components here
   // For example, you might want to initialize Wi-Fi, BLE, or other peripherals
   ESP_LOGI("M-power", "Application main started");
@@ -81,7 +81,7 @@ void app_main(void) {
   beep_test(&BootSound);
 
   
-  ble_init();
+  // ble_init();
   
  
   BaseType_t xReturned;
@@ -89,7 +89,7 @@ void app_main(void) {
   
   xReturned = xTaskCreate(continuous_adc_read, "adctest", 4096, NULL, 4, NULL);
   
-  xReturned = xTaskCreate(control_output_task, "control", 2048, NULL, 3, NULL);
+  xReturned = xTaskCreate(control_output_task, "control", 4096, NULL, 3, NULL);
   // xReturned = xTaskCreate(DACtest, "dactest", 2048, NULL, 2, NULL);
 
   
